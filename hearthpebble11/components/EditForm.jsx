@@ -3,41 +3,38 @@
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 
-export default function EditForm() {
-  const { data: session, status } = useSession();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+export default function EditForm({ searchParams }) {
 
   const router = useRouter();
 
-  useEffect(() => {
-    
-    setName(session?.user.name);
-    setEmail(session?.user.email);
-    
-  }, [session?.user]);
+  const { data: session, status } = useSession();
+  const [name, setName] = useState( searchParams.passedName );
+  const [email, setEmail] = useState( searchParams.passedEmail );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const res = await fetch("/api/edit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          email,
-        }),
-      });
+        console.log(name)
+        const res = await fetch("/api/edit", 
+            {
+                method: "POST",
+                headers: {
+                "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ newName: name, email: email }),
+            }
+        );
 
-      if (res.ok) {
-        router.push("/");
-      } else {
-        console.log("User name change failed.");
-      }
+        if (res.ok) {
+            await signIn("credentials", { redirect: false })
+            router.push("/");
+        } else {
+            console.log("User name change failed.");
+        }
+
     } catch (error) {
       console.log("Error during update: ", error);
     }

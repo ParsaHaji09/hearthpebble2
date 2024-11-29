@@ -6,10 +6,7 @@ export async function POST(req) {
   try {
     await connectMongoDB();
     const { newName, email } = await req.json();
-    console.log(newName)
-    console.log(email)
-    const user = await User.findOne({ email }).select("_id");
-    console.log(user)
+    const user = await User.findOne({ email:email }).select("_id");
     user.name = newName;
     await user.save();
     console.log("User updated successfully:", user);
